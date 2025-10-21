@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         tone = 'casual',
         length = 'medium',
         platform = 'all',
-        count = 12
+        count = 6
       } = body;
 
       // Generate scripts using OpenAI with options

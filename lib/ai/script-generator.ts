@@ -43,7 +43,7 @@ export async function generateScripts(
     tone = 'casual',
     length = 'medium',
     platform = 'all',
-    count = 12
+    count = 6
   } = options;
 
   const prompt = buildPrompt(productData, { tone, length, platform, count });
@@ -52,123 +52,40 @@ export async function generateScripts(
   const durationRange = getDurationRange(length);
   const wordCountRange = getWordCountRange(length);
 
-  const systemPrompt = `You are an expert video ad scriptwriter specializing in short-form video content for TikTok, Instagram Reels, and Facebook. Your scripts are conversion-focused, engaging, and optimized for social media algorithms.
+  const systemPrompt = `You are an expert video ad scriptwriter for TikTok, Instagram, and Facebook. Create ${count} conversion-focused scripts with:
 
-TARGET TONE: ${tone.toUpperCase()}
-${getToneGuidelines(tone)}
+TONE: ${tone} - ${tone === 'casual' ? 'conversational, relatable' : tone === 'energetic' ? 'fast-paced, exciting' : tone === 'professional' ? 'credible, data-driven' : 'helpful, clear'}
+LENGTH: ${durationRange.min}-${durationRange.max}s (${wordCountRange.min}-${wordCountRange.max} words)
+PLATFORM: ${platform.toUpperCase()}
 
-TARGET LENGTH: ${length.toUpperCase()} (${durationRange.min}-${durationRange.max} seconds, ${wordCountRange.min}-${wordCountRange.max} words)
-${getLengthGuidelines(length)}
+Script categories (distribute evenly):
+1. Hook-Focused: question, shocking-stat, or pain-point hooks
+2. Problem-Solution: relatable problem → product solution
+3. Social Proof: testimonial style with credibility
 
-TARGET PLATFORM: ${platform.toUpperCase()}
-${getPlatformGuidelines(platform)}
+Requirements:
+- Strong hook (first 3s)
+- Clear benefits
+- Compelling CTA
+- ${durationRange.min}-${durationRange.max}s duration
 
-Generate ${count} strategically diverse video ad script variations organized into 4 categories:
-
-**CATEGORY 1: Hook-Focused (3 scripts)**
-- Each uses a different hook type: question, shocking-stat, pain-point
-- Hook must grab attention in first 3 seconds
-- Focus on maximizing hook strength
-
-**CATEGORY 2: Problem-Solution (3 scripts)**
-- Identify relatable problem → Present product as solution
-- Different angles: identify-relate, before-after, transformation
-- Emphasize emotional benefits
-
-**CATEGORY 3: Social Proof (3 scripts)**
-- Testimonial style, user statistics, expert endorsement
-- Build trust and credibility
-- Include specific numbers when possible
-
-**CATEGORY 4: Platform-Optimized (3 scripts)**
-- TikTok: Fast-paced, trending, authentic (15-25s)
-- Instagram: Aesthetic, aspirational, lifestyle (20-30s)
-- YouTube: Educational, detailed, value-driven (30-45s)
-
-Each script must include:
-- 15-45 seconds when spoken (varies by platform)
-- Strong opening hook (first 3 seconds)
-- Clear benefits (not just features)
-- Compelling call-to-action
-- Conversational, authentic tone
-- Simple, engaging language
-
-IMPORTANT: Return ONLY valid JSON. Do not include any text before or after the JSON object.
-
-Return scripts in this EXACT JSON format:
+Return ONLY valid JSON in this format:
 {
-  "scripts": [
-    {
-      "text": "full script text here",
-      "style": "problem-solution|testimonial|product-demo|before-after|lifestyle|unboxing",
-      "hook_type": "question|shocking-stat|pain-point|aspiration|curiosity",
-      "estimated_duration": 30,
-      "key_message": "main benefit",
-      "cta": "call to action",
-      "hook_strength": 8,
-      "engagement_prediction": "high",
-      "platform_scores": {
-        "tiktok": 85,
-        "instagram": 75,
-        "youtube": 60,
-        "facebook": 70
-      },
-      "pacing": "fast",
-      "emotion_level": "energetic",
-      "strategy_type": "hook-focused"
-    }
-  ]
-}
-
-IMPORTANT: You must analyze and score each script using these SPECIFIC criteria:
-
-**hook_strength (1-10):** How attention-grabbing is the first 3 seconds?
-- 9-10: Shocking, unexpected, or highly relatable opening
-- 7-8: Strong question or bold statement
-- 5-6: Decent but predictable hook
-- 1-4: Weak or slow start
-
-**engagement_prediction:** Based on hooks, pacing, emotional resonance, and watch-through likelihood
-- viral-potential: Highly shareable, strong hook, fast pacing, emotional payoff
-- high: Good hook, engaging throughout, clear value
-- medium: Decent but missing key elements
-- low: Slow start or unclear value prop
-
-**Platform Optimization Scores (0-100) - Score based on these SPECIFIC platform requirements:**
-
-TikTok (score based on):
-- Duration: 15-30s = 100pts, 31-45s = 80pts, 46s+ = 60pts
-- Pacing: Fast = +20pts, Medium = +10pts, Slow = -10pts
-- Hook strength: Must be 7+ for high score
-- Trending language/relatability: Conversational tone = +10pts
-- Music/sound potential: Energetic tone = +10pts
-
-Instagram (score based on):
-- Duration: 20-30s = 100pts, 31-45s = 90pts, other = 70pts
-- Aesthetic appeal: Lifestyle/aspirational = +15pts
-- Visual storytelling: Before/after or transformation = +15pts
-- Authenticity: Personal/testimonial style = +10pts
-- Hashtag optimization: Clear niche = +10pts
-
-YouTube (score based on):
-- Duration: 30-60s = 100pts, 15-29s = 70pts (too short)
-- Educational value: Problem-solution = +15pts
-- Depth of information: Detailed explanations = +15pts
-- Search intent: Clear benefit keywords = +10pts
-- Watch time optimization: Strong retention = +10pts
-
-Facebook (score based on):
-- Duration: 20-45s = 100pts
-- Social proof: Testimonials/stats = +15pts
-- Emotional connection: Relatable stories = +15pts
-- Share-ability: Inspiring or helpful = +10pts
-- Older demographic appeal: Clear, not too trendy = +10pts
-
-**pacing:** fast|medium|slow (information delivery speed)
-**emotion_level:** calm|energetic|urgent|aspirational (emotional tone)
-**strategy_type:** which category this script belongs to
-
-Calculate scores mathematically based on these criteria and be precise.`;
+  "scripts": [{
+    "text": "script text",
+    "style": "problem-solution|testimonial|product-demo",
+    "hook_type": "question|shocking-stat|pain-point|curiosity",
+    "estimated_duration": 30,
+    "key_message": "main benefit",
+    "cta": "call to action",
+    "hook_strength": 8,
+    "engagement_prediction": "high|medium|viral-potential",
+    "platform_scores": {"tiktok": 85, "instagram": 75, "youtube": 60, "facebook": 70},
+    "pacing": "fast|medium|slow",
+    "emotion_level": "energetic|calm|urgent|aspirational",
+    "strategy_type": "hook-focused|problem-solution|social-proof"
+  }]
+}`;
 
   // Validate token limits before making request
   const validation = validateTokenLimits(systemPrompt, prompt, 4000, "gpt-4o-mini");
