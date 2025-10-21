@@ -226,7 +226,7 @@ export function setCachedResponse(key: string, data: any, ttlMs: number = 300000
  */
 export async function withMiddleware(
   req: NextRequest,
-  handler: (req: NextRequest, user: any) => Promise<NextResponse>,
+  handler: (req: NextRequest, user: any, body?: any) => Promise<NextResponse>,
   options: {
     requireAuth?: boolean;
     rateLimit?: RateLimitConfig;
@@ -251,10 +251,11 @@ export async function withMiddleware(
       user = authResult.user;
     }
 
-    // Request validation
+    // Request validation - parse body once
+    let parsedBody = null;
     if (options.validateBody && req.method !== "GET") {
-      const body = await req.json();
-      const validation = validateRequest(body, options.validateBody.requiredFields, options.validateBody.schema);
+      parsedBody = await req.json();
+      const validation = validateRequest(parsedBody, options.validateBody.requiredFields, options.validateBody.schema);
       if (!validation.valid && validation.error) return validation.error;
     }
 
@@ -268,8 +269,8 @@ export async function withMiddleware(
       }
     }
 
-    // Execute handler
-    const response = await handler(req, user);
+    // Execute handler - pass parsed body if available
+    const response = await handler(req, user, parsedBody);
 
     // Cache successful GET responses
     if (options.cache?.enabled && req.method === "GET" && response.status === 200) {

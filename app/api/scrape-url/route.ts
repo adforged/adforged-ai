@@ -26,8 +26,8 @@ function validateURL(url: string): { valid: boolean; error?: string } {
 export async function POST(req: NextRequest) {
   return withMiddleware(
     req,
-    async (req, user) => {
-      const { url } = await req.json();
+    async (req, user, body) => {
+      const { url } = body || {};
 
       if (!url || typeof url !== 'string') {
         return NextResponse.json(
