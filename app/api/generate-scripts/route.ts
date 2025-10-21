@@ -71,8 +71,8 @@ function validateScriptRequest(body: any): { valid: boolean; errors: string[] } 
 export async function POST(req: NextRequest) {
   return withMiddleware(
     req,
-    async (req, user) => {
-      const body: GenerateScriptsRequest = await req.json();
+    async (req, user, parsedBody) => {
+      const body: GenerateScriptsRequest = parsedBody || {};
 
       // Validate request
       const validation = validateRequest<GenerateScriptsRequest>(
